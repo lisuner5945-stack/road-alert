@@ -39,12 +39,18 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
 
-        // Базовый URL источника базы камер (GitHub Releases / GitHub Pages).
+        // Источники базы камер: основной и запасной. Домены разные намеренно —
+        // если провайдер не пускает к одному, приложение возьмёт базу со второго.
         // Проверяется release-задачей: только HTTPS, без localhost.
         buildConfigField(
             "String",
             "CAMERA_DB_BASE_URL",
             "\"https://raw.githubusercontent.com/lisuner5945-stack/road-alert/main/database/\"",
+        )
+        buildConfigField(
+            "String",
+            "CAMERA_DB_MIRROR_URL",
+            "\"https://lisuner5945-stack.github.io/road-alert/database/\"",
         )
     }
 

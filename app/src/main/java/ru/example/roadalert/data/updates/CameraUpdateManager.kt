@@ -3,6 +3,7 @@ package ru.example.roadalert.data.updates
 import android.content.Context
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import ru.example.roadalert.data.camera.CameraRepository
@@ -30,7 +31,8 @@ sealed interface UpdateResult {
 class CameraUpdateManager(
     private val context: Context,
     private val repository: CameraRepository,
-    private val baseUrl: String,
+    /** Источники базы по порядку предпочтения: домены разные не случайно. */
+    private val baseUrls: List<String>,
     private val parser: CameraDatabaseParser = CameraDatabaseParser(),
     private val client: OkHttpClient = defaultClient(),
 ) {
@@ -44,12 +46,31 @@ class CameraUpdateManager(
     }
 
     private suspend fun performUpdate(force: Boolean): UpdateResult {
-        if (!baseUrl.startsWith("https://")) {
+        val sources = baseUrls.filter { it.startsWith("https://") }
+        if (sources.isEmpty()) {
             return UpdateResult.Failed("Источник базы должен использовать HTTPS")
         }
 
-        val metadataJson = download(baseUrl + METADATA_FILE)
-            ?: return UpdateResult.Failed("Не удалось скачать metadata.json")
+        // Провайдер может не пускать к одному из хостов — пробуем все по очереди.
+        var metadataJson: String? = null
+        var baseUrl = sources.first()
+        for (source in sources) {
+            val downloaded = download(source + METADATA_FILE)
+            if (downloaded != null) {
+                metadataJson = downloaded
+                baseUrl = source
+                AppLog.event("DB_SOURCE_OK", "host" to hostOf(source))
+                break
+            }
+            AppLog.event("DB_SOURCE_UNAVAILABLE", "host" to hostOf(source))
+        }
+
+        if (metadataJson == null) {
+            return UpdateResult.Failed(
+                "Не удалось скачать metadata.json ни с одного адреса. " +
+                    "Проверьте интернет: возможно, провайдер блокирует доступ.",
+            )
+        }
         val metadata = parser.parseMetadata(metadataJson)
             ?: return UpdateResult.Failed("metadata.json повреждён")
 
@@ -116,6 +137,9 @@ class CameraUpdateManager(
             temporaryFile.delete()
         }
     }
+
+    private fun hostOf(url: String): String =
+        runCatching { url.toHttpUrl().host }.getOrDefault(url)
 
     private fun download(url: String): String? = runCatching {
         client.newCall(Request.Builder().url(url).build()).execute().use { response ->

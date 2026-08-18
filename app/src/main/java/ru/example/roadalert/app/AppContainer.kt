@@ -29,7 +29,7 @@ class AppContainer(context: Context) {
         CameraUpdateManager(
             context = appContext,
             repository = cameraRepository,
-            baseUrl = BuildConfig.CAMERA_DB_BASE_URL,
+            baseUrls = listOf(BuildConfig.CAMERA_DB_BASE_URL, BuildConfig.CAMERA_DB_MIRROR_URL),
         )
     }
 

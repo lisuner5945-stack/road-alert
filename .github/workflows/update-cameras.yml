@@ -59,6 +59,13 @@ jobs:
           print("OK:", metadata["camera_count"], "камер, версия", metadata["database_version"])
           PY
 
+      - name: Зеркало базы для GitHub Pages
+        run: |
+          set -e
+          mkdir -p docs/database
+          cp database/camera_database.json.gz database/metadata.json database/SHA256SUMS docs/database/
+          echo "Зеркало обновлено"
+
       - name: Публикация обновления
         run: |
           set -e
@@ -66,7 +73,7 @@ jobs:
           git config user.email "camera-db-bot@users.noreply.github.com"
           # Именно git add + diff --cached: git diff не видит новые файлы,
           # и на первом запуске база молча оставалась незакоммиченной.
-          git add -A database
+          git add -A database docs/database
           if git diff --cached --quiet; then
             echo "База не изменилась — коммит не нужен"
             exit 0

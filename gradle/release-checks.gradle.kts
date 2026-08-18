@@ -84,6 +84,14 @@ val verifyReleaseConfig = tasks.register("verifyReleaseConfig") {
                 }
             }
 
+            val mirrorUrl = stringField("CAMERA_DB_MIRROR_URL").orEmpty()
+            if (mirrorUrl.isNotBlank() && !mirrorUrl.startsWith("https://")) {
+                problems += "CAMERA_DB_MIRROR_URL должен быть HTTPS, сейчас '$mirrorUrl'."
+            }
+            if (mirrorUrl.contains("OWNER/REPO")) {
+                problems += "CAMERA_DB_MIRROR_URL содержит placeholder OWNER/REPO."
+            }
+
             if (!dbUrl.startsWith("https://")) {
                 problems += "CAMERA_DB_BASE_URL должен быть HTTPS, сейчас '$dbUrl'."
             }
