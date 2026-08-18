@@ -48,6 +48,11 @@ fun AboutScreen(
                     "является полной. Приложение не гарантирует наличие всех камер.",
                 style = MaterialTheme.typography.bodyMedium,
             )
+            Text(
+                "Подложка на экране «Карта камер» — тоже OpenStreetMap: изображения " +
+                    "карты загружаются с публичных серверов проекта.",
+                style = MaterialTheme.typography.bodyMedium,
+            )
         }
 
         SectionCard("Что это за приложение") {

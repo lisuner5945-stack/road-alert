@@ -10,6 +10,7 @@ import kotlinx.coroutines.withContext
 import ru.example.roadalert.data.database.CameraDao
 import ru.example.roadalert.data.database.CameraEntity
 import ru.example.roadalert.data.database.DatabaseMetaEntity
+import ru.example.roadalert.detection.BoundingBox
 import ru.example.roadalert.detection.GeoMath
 import ru.example.roadalert.domain.model.CameraPoint
 import ru.example.roadalert.util.AppLog
@@ -69,6 +70,12 @@ class CameraRepository(private val dao: CameraDao) {
             GeoMath.haversineMeters(latitude, longitude, it.latitude, it.longitude) <= radiusMeters
         }
     }
+
+    /**
+     * Все камеры внутри прямоугольника. Используется картой: экран — это и есть
+     * прямоугольник, а R-дерево отвечает за микросекунды.
+     */
+    fun camerasInBox(box: BoundingBox): List<CameraPoint> = index.search(box)
 
     /**
      * Атомарно заменяет базу. При исключении Room откатывает транзакцию,

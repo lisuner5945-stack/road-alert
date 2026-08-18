@@ -172,6 +172,9 @@ dependencies {
 
     implementation(libs.yandex.mobileads)
 
+    // Карта: OpenStreetMap без Google Play Services, без ключей API и без платы
+    implementation(libs.osmdroid.android)
+
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.robolectric)

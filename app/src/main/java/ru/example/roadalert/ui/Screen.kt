@@ -4,6 +4,7 @@ package ru.example.roadalert.ui
 enum class Screen {
     ONBOARDING,
     HOME,
+    MAP,
     DRIVE,
     HUD,
     SETTINGS,

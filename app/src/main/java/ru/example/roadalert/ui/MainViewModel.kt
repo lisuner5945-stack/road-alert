@@ -13,6 +13,8 @@ import ru.example.roadalert.app.AppContainer
 import ru.example.roadalert.data.camera.CameraDatabaseInfo
 import ru.example.roadalert.data.settings.AppSettings
 import ru.example.roadalert.data.settings.DistanceProfile
+import ru.example.roadalert.detection.BoundingBox
+import ru.example.roadalert.domain.model.CameraPoint
 import ru.example.roadalert.drive.DriveStateHolder
 
 /**
@@ -41,6 +43,10 @@ class MainViewModel(private val container: AppContainer) : ViewModel() {
         // База нужна и до поездки — чтобы показать на главном экране, что всё готово.
         viewModelScope.launch { container.cameraRepository.ensureLoaded() }
     }
+
+    /** Камеры в видимом прямоугольнике карты: чтение из индекса в памяти. */
+    fun camerasInBox(box: BoundingBox): List<CameraPoint> =
+        container.cameraRepository.camerasInBox(box)
 
     fun navigateTo(screen: Screen) {
         backStack.value = backStack.value + screen

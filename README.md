@@ -36,7 +36,8 @@ sdk.dir=D:/Android/AndroidSdk
 
 | Возможность | Где искать |
 |---|---|
-| Экраны Compose (Home / Drive / HUD / Settings / About / Onboarding) | `ui/` |
+| Экраны Compose (Home / Map / Drive / HUD / Settings / About / Onboarding) | `ui/` |
+| Карта камер на OpenStreetMap (osmdroid, без ключей API) | `ui/map/` |
 | Локальная база камер, Room + R-tree | `data/database/`, `data/camera/` |
 | Определение камеры впереди, фильтр по направлению | `detection/` |
 | Машина состояний предупреждений | `alerts/AlertStateMachine.kt` |

@@ -42,6 +42,7 @@ data class HomeUiState(
 fun HomeScreen(
     state: HomeUiState,
     onStartTrip: () -> Unit,
+    onOpenMap: () -> Unit,
     onOpenSettings: () -> Unit,
     onOpenAbout: () -> Unit,
     modifier: Modifier = Modifier,
@@ -101,6 +102,16 @@ fun HomeScreen(
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.75f),
             )
+        }
+
+        OutlinedButton(
+            onClick = onOpenMap,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(56.dp),
+            enabled = state.databaseReady,
+        ) {
+            Text("Карта камер", style = MaterialTheme.typography.titleMedium)
         }
 
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.fillMaxWidth()) {

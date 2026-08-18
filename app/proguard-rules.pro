@@ -14,3 +14,7 @@
 # Yandex Mobile Ads (SDK поставляет собственные правила, дублируем базовое)
 -keep class com.yandex.mobile.ads.** { *; }
 -dontwarn com.yandex.mobile.ads.**
+
+# osmdroid (карта камер): часть классов подтягивается рефлексией
+-keep class org.osmdroid.** { *; }
+-dontwarn org.osmdroid.**

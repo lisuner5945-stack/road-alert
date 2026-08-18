@@ -20,6 +20,7 @@ import ru.example.roadalert.ui.drive.DriveScreen
 import ru.example.roadalert.ui.home.HomeScreen
 import ru.example.roadalert.ui.home.HomeUiState
 import ru.example.roadalert.ui.hud.HudScreen
+import ru.example.roadalert.ui.map.CameraMapScreen
 import ru.example.roadalert.ui.onboarding.OnboardingScreen
 import ru.example.roadalert.ui.settings.SettingsActions
 import ru.example.roadalert.ui.settings.SettingsInfo
@@ -77,6 +78,12 @@ fun RoadAlertApp(
                 when {
                     !settings.onboardingCompleted -> OnboardingScreen(
                         onContinue = { viewModel.completeOnboarding() },
+                    )
+
+                    screen == Screen.MAP -> CameraMapScreen(
+                        camerasProvider = viewModel::camerasInBox,
+                        databaseReady = databaseInfo.isReady,
+                        onBack = { viewModel.navigateBack() },
                     )
 
                     screen == Screen.DRIVE -> DriveScreen(
@@ -149,6 +156,7 @@ fun RoadAlertApp(
                             lastUpdateCheck = formatUpdateCheck(settings.lastUpdateCheckAtMs),
                         ),
                         onStartTrip = onStartTrip,
+                        onOpenMap = { viewModel.navigateTo(Screen.MAP) },
                         onOpenSettings = { viewModel.navigateTo(Screen.SETTINGS) },
                         onOpenAbout = { viewModel.navigateTo(Screen.ABOUT) },
                         developerMenuAvailable = BuildConfig.DEVELOPER_MENU,
