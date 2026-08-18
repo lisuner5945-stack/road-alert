@@ -10,6 +10,7 @@
 from __future__ import annotations
 
 import json
+import ssl
 import time
 import urllib.error
 import urllib.parse
@@ -25,7 +26,6 @@ ENDPOINTS = [
     "https://overpass.kumi.systems/api/interpreter",
     "https://overpass.private.coffee/api/interpreter",
     "https://overpass.osm.ch/api/interpreter",
-    "https://overpass.osm.jp/api/interpreter",
 ]
 
 USER_AGENT = "RoadAlert-camera-db/1.0 (OpenStreetMap ODbL; https://github.com/lisuner5945-stack/road-alert)"
@@ -40,6 +40,23 @@ QUERY_TEMPLATE = """
 );
 out center tags;
 """
+
+
+def _ssl_context() -> ssl.SSLContext:
+    """Контекст TLS с актуальными корневыми сертификатами.
+
+    На Windows список корневых сертификатов у Python бывает устаревшим,
+    и проверка падает с "certificate has expired" даже там, где curl работает.
+    Если установлен certifi — берём сертификаты оттуда.
+    """
+    try:
+        import certifi
+    except ImportError:
+        return ssl.create_default_context()
+    return ssl.create_default_context(cafile=certifi.where())
+
+
+SSL_CONTEXT = _ssl_context()
 
 
 class OverpassError(RuntimeError):
@@ -71,7 +88,7 @@ def fetch_region(
             headers={"User-Agent": USER_AGENT},
         )
         try:
-            with opener(request, timeout=timeout + 60) as response:
+            with opener(request, timeout=timeout + 60, context=SSL_CONTEXT) as response:
                 payload = json.loads(response.read().decode("utf-8"))
             elements = payload.get("elements")
             if elements is None:
