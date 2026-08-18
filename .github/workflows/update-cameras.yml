@@ -62,14 +62,17 @@ jobs:
       - name: Публикация обновления
         run: |
           set -e
-          if git diff --quiet -- database; then
+          git config user.name "camera-db-bot"
+          git config user.email "camera-db-bot@users.noreply.github.com"
+          # Именно git add + diff --cached: git diff не видит новые файлы,
+          # и на первом запуске база молча оставалась незакоммиченной.
+          git add -A database
+          if git diff --cached --quiet; then
             echo "База не изменилась — коммит не нужен"
             exit 0
           fi
-          git config user.name "camera-db-bot"
-          git config user.email "camera-db-bot@users.noreply.github.com"
-          git add database
           git commit -m "chore(database): обновление базы камер из OpenStreetMap"
+          git pull --rebase --autostash origin main
           git push
 
       - name: Артефакт для ручной проверки
