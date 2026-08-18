@@ -32,10 +32,12 @@ jobs:
       - name: demo-блоки только в debug-конфигурации
         run: python tools/ci/check_demo_ads.py
 
+      # Robolectric требует JDK 21 для эмуляции Android 16 (compileSdk 36):
+      # на JDK 17 тесты Room падают с UnsupportedOperationException.
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: '17'
+          java-version: '21'
 
       - name: Android SDK (platform 36, build-tools 36) + принятые лицензии
         uses: android-actions/setup-android@v3
