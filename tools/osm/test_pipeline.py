@@ -122,6 +122,49 @@ class ValidateTest(unittest.TestCase):
         validate_against_previous(new_count=950, previous_count=1000)
 
 
+class RegionFailureTest(unittest.TestCase):
+    """Единичный отказ региона не должен ронять всю сборку, но и молчать нельзя."""
+
+    def setUp(self):
+        self.original_fetch = build_database.fetch_region
+        self.original_sleep = build_database.time.sleep
+        build_database.time.sleep = lambda _seconds: None
+
+    def tearDown(self):
+        build_database.fetch_region = self.original_fetch
+        build_database.time.sleep = self.original_sleep
+
+    def test_single_failure_tolerated(self):
+        calls = {"n": 0}
+
+        def fetch(region):
+            calls["n"] += 1
+            if calls["n"] == 1:
+                raise RuntimeError("Overpass недоступен")
+            return [
+                {
+                    "type": "node",
+                    "id": calls["n"],
+                    "lat": 55.0 + calls["n"] / 1000,
+                    "lon": 37.0,
+                    "tags": {"highway": "speed_camera"},
+                }
+            ]
+
+        build_database.fetch_region = fetch
+        cameras, failed = build_database.collect_cameras(sample=False, max_failed_regions=1)
+        self.assertEqual(1, len(failed))
+        self.assertGreater(len(cameras), 0)
+
+    def test_too_many_failures_cancel_publication(self):
+        def always_fail(region):
+            raise RuntimeError("Overpass недоступен")
+
+        build_database.fetch_region = always_fail
+        with self.assertRaises(ValidationError):
+            build_database.collect_cameras(sample=False, max_failed_regions=1)
+
+
 class QueryTest(unittest.TestCase):
     def test_query_limited_to_region(self):
         region = RUSSIA_REGIONS[0]
@@ -158,9 +201,23 @@ class BuildOutputTest(unittest.TestCase):
     def test_build_refuses_empty_database(self):
         with tempfile.TemporaryDirectory() as directory:
             original = build_database.collect_cameras
-            build_database.collect_cameras = lambda sample: []
+            build_database.collect_cameras = lambda sample, max_failed_regions=0: ([], [])
             try:
                 self.assertEqual(2, build_database.main(["--output", directory, "--sample"]))
+            finally:
+                build_database.collect_cameras = original
+
+    def test_metadata_lists_failed_regions(self):
+        with tempfile.TemporaryDirectory() as directory:
+            original = build_database.collect_cameras
+            stub = [{"id": "osm:node:1", "lat": 55.0, "lon": 37.0, "type": "SPEED_CAMERA"}]
+            build_database.collect_cameras = (
+                lambda sample, max_failed_regions=0: (stub, ["kamchatka"])
+            )
+            try:
+                self.assertEqual(0, build_database.main(["--output", directory, "--sample"]))
+                metadata = json.loads((Path(directory) / "metadata.json").read_text(encoding="utf-8"))
+                self.assertEqual(["kamchatka"], metadata["failed_regions"])
             finally:
                 build_database.collect_cameras = original
 

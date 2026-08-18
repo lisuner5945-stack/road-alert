@@ -18,9 +18,13 @@ from typing import Any
 
 from regions import Region
 
+# Несколько независимых инстансов: любой из них может быть перегружен
+# или отказать облачным IP (например, серверам GitHub Actions).
 ENDPOINTS = [
     "https://overpass-api.de/api/interpreter",
     "https://overpass.kumi.systems/api/interpreter",
+    "https://overpass.private.coffee/api/interpreter",
+    "https://overpass.osm.ch/api/interpreter",
     "https://overpass.osm.jp/api/interpreter",
 ]
 
@@ -49,8 +53,8 @@ def build_query(region: Region, timeout: int = 180) -> str:
 def fetch_region(
     region: Region,
     *,
-    attempts: int = 4,
-    base_delay: float = 20.0,
+    attempts: int = 6,
+    base_delay: float = 15.0,
     timeout: int = 180,
     opener=urllib.request.urlopen,
     sleep=time.sleep,
@@ -75,7 +79,8 @@ def fetch_region(
             return elements
         except Exception as error:  # noqa: BLE001 - сеть падает по-разному
             last_error = error
-            delay = base_delay * (2 ** attempt)
+            # Экспоненциальная задержка с потолком: 15, 30, 60, 120, 240 секунд.
+            delay = min(base_delay * (2 ** attempt), 240.0)
             print(f"  ! {region.name}: попытка {attempt + 1} не удалась ({error}); ждём {delay:.0f} с")
             sleep(delay)
 

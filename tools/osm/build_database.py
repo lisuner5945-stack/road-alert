@@ -55,21 +55,43 @@ def read_previous_metadata(output_dir: Path) -> dict[str, Any] | None:
         return None
 
 
-def collect_cameras(sample: bool) -> list[dict[str, Any]]:
+def collect_cameras(sample: bool, max_failed_regions: int = 0) -> tuple[list[dict[str, Any]], list[str]]:
+    """Собирает камеры по регионам.
+
+    Публичные инстансы Overpass бесплатны и иногда отказывают (особенно
+    облачным IP), поэтому единичные отказы не должны хоронить весь запуск.
+    Но и молчать о них нельзя: список неудачных регионов возвращается наверх
+    и попадает в metadata.
+    """
     if sample:
         sample_path = Path(__file__).with_name("sample_elements.json")
         elements = json.loads(sample_path.read_text(encoding="utf-8"))
-        return normalize_elements(elements)
+        return normalize_elements(elements), []
 
     all_elements: list[dict[str, Any]] = []
+    failed: list[str] = []
+
     for index, region in enumerate(RUSSIA_REGIONS, start=1):
-        print(f"[{index}/{len(RUSSIA_REGIONS)}] {region.name} ...")
-        elements = fetch_region(region)
-        print(f"    получено элементов: {len(elements)}")
-        all_elements.extend(elements)
+        print(f"[{index}/{len(RUSSIA_REGIONS)}] {region.name} ...", flush=True)
+        try:
+            elements = fetch_region(region)
+        except Exception as error:  # noqa: BLE001 - причина уже напечатана
+            failed.append(region.name)
+            print(f"    ПРОПУЩЕН: {error}", flush=True)
+            if len(failed) > max_failed_regions:
+                raise ValidationError(
+                    f"Не удалось получить {len(failed)} регионов "
+                    f"({', '.join(failed)}); допустимо {max_failed_regions}"
+                ) from error
+        else:
+            print(f"    получено элементов: {len(elements)}", flush=True)
+            all_elements.extend(elements)
         if index < len(RUSSIA_REGIONS):
             time.sleep(PAUSE_BETWEEN_REGIONS_SECONDS)
-    return normalize_elements(all_elements)
+
+    if failed:
+        print(f"ВНИМАНИЕ: пропущены регионы: {', '.join(failed)}", flush=True)
+    return normalize_elements(all_elements), failed
 
 
 def build_payload(cameras: list[dict[str, Any]], generated_at: str) -> dict[str, Any]:
@@ -87,6 +109,7 @@ def write_outputs(
     output_dir: Path,
     cameras: list[dict[str, Any]],
     download_url: str | None,
+    failed_regions: list[str] | None = None,
 ) -> dict[str, Any]:
     output_dir.mkdir(parents=True, exist_ok=True)
     generated_at = utc_now_iso()
@@ -121,6 +144,7 @@ def write_outputs(
         "camera_count": len(cameras),
         "sha256": checksum,
         "download_url": download_url or "",
+        "failed_regions": failed_regions or [],
     }
     (output_dir / METADATA_FILE).write_text(
         json.dumps(metadata, ensure_ascii=False, indent=2) + "\n",
@@ -143,20 +167,29 @@ def main(argv: list[str] | None = None) -> int:
         help="разрешить резкое уменьшение числа камер (ручное подтверждение)",
     )
     parser.add_argument("--download-url", default=os.environ.get("CAMERA_DB_URL", ""))
+    parser.add_argument(
+        "--max-failed-regions",
+        type=int,
+        default=3,
+        help="сколько регионов можно потерять, не отменяя публикацию",
+    )
     args = parser.parse_args(argv)
 
     output_dir = Path(args.output)
     previous = read_previous_metadata(output_dir)
 
     try:
-        cameras = collect_cameras(sample=args.sample)
+        cameras, failed_regions = collect_cameras(
+            sample=args.sample,
+            max_failed_regions=args.max_failed_regions,
+        )
         validate_cameras(cameras)
         validate_against_previous(
             len(cameras),
             (previous or {}).get("camera_count"),
             allow_shrink=args.allow_shrink,
         )
-        metadata = write_outputs(output_dir, cameras, args.download_url or None)
+        metadata = write_outputs(output_dir, cameras, args.download_url or None, failed_regions)
     except ValidationError as error:
         print(f"ОТМЕНА ПУБЛИКАЦИИ: {error}", file=sys.stderr)
         return 2
@@ -168,6 +201,8 @@ def main(argv: list[str] | None = None) -> int:
         f"Готово: {metadata['camera_count']} камер, версия {metadata['database_version']}, "
         f"sha256 {metadata['sha256'][:16]}..."
     )
+    if metadata["failed_regions"]:
+        print(f"Пропущенные регионы: {', '.join(metadata['failed_regions'])}")
     return 0
 
 
