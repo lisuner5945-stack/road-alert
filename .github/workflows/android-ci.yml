@@ -1,0 +1,77 @@
+name: Android CI
+
+on:
+  push:
+    branches: [ main, master, develop ]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Проверка, что секреты не закоммичены
+        run: |
+          set -e
+          if git ls-files | grep -E '(\.jks|\.keystore|^keystore\.properties$|^local\.properties$|^ads\.properties$)' ; then
+            echo "::error::В репозитории найдены файлы подписи/секретов"
+            exit 1
+          fi
+          echo "OK: секретов в индексе нет"
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: demo-блоки только в debug-конфигурации
+        run: python tools/ci/check_demo_ads.py
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Gradle wrapper validation
+        uses: gradle/actions/wrapper-validation@v4
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      - name: Compile debug
+        run: ./gradlew assembleDebug --stacktrace
+
+      - name: Unit tests
+        run: ./gradlew testDebugUnitTest --stacktrace
+
+      - name: Lint
+        run: ./gradlew lintDebug --stacktrace
+
+      - name: Отчёты
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: reports
+          path: |
+            app/build/reports/
+            app/build/test-results/
+          if-no-files-found: ignore
+
+  pipeline:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Тесты OSM pipeline
+        run: |
+          if [ -d tools/osm ]; then
+            python -m unittest discover -s tools/osm -p 'test_*.py' -v
+          else
+            echo "pipeline ещё не создан"
+          fi

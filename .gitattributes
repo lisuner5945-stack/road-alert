@@ -1,0 +1,9 @@
+# Единые переводы строк: gradlew и скрипты должны остаться LF,
+# иначе сборка на Linux-раннерах GitHub Actions ломается.
+* text=auto eol=lf
+*.bat text eol=crlf
+gradlew text eol=lf
+*.jar binary
+*.png binary
+*.jpg binary
+*.gz binary

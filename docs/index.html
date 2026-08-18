@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Road Alert — GPS-предупреждения о камерах</title>
+<style>
+  :root { color-scheme: light dark; }
+  body {
+    margin: 0 auto; max-width: 720px; padding: 32px 18px 64px;
+    font: 16px/1.6 -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  }
+  h1 { font-size: 1.8rem; margin-bottom: .1em; }
+  .lead { opacity: .8; margin-top: 0; }
+  ul { padding-left: 1.2em; }
+  a { color: #1160a8; }
+  @media (prefers-color-scheme: dark) { a { color: #7fb2ff; } }
+  .note { border-left: 4px solid #ffb300; padding: 8px 14px; background: rgba(255,179,0,.08); }
+</style>
+</head>
+<body>
+
+<h1>Road Alert</h1>
+<p class="lead">GPS-предупреждения о камерах контроля скорости и ограничениях. Работает офлайн.</p>
+
+<p>Приложение сравнивает координаты телефона с базой камер, которая хранится на самом
+устройстве, и заранее предупреждает голосом о камере впереди по ходу движения.</p>
+
+<h2>Что важно знать</h2>
+<ul>
+  <li>Это <strong>не</strong> радиоэлектронный радар-детектор: приложение не принимает
+      радарные сигналы и не вмешивается в работу камер.</li>
+  <li>База камер основана на открытых данных OpenStreetMap и не является полной.</li>
+  <li>Обработка координат выполняется локально; история поездок не передаётся разработчику.</li>
+</ul>
+
+<p class="note">Приложение является вспомогательным средством. Соблюдайте ПДД и дорожные
+знаки. Не взаимодействуйте с телефоном во время движения.</p>
+
+<h2>Документы</h2>
+<ul>
+  <li><a href="privacy/">Политика конфиденциальности</a></li>
+</ul>
+
+<h2>Источник данных</h2>
+<p>© OpenStreetMap contributors. Данные распространяются по лицензии
+<a href="https://opendatacommons.org/licenses/odbl/">ODbL</a>.</p>
+
+</body>
+</html>

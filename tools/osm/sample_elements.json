@@ -1,0 +1,49 @@
+[
+  {
+    "type": "node",
+    "id": 1001,
+    "lat": 55.751244,
+    "lon": 37.618423,
+    "tags": {"highway": "speed_camera", "maxspeed": "60", "direction": "180"}
+  },
+  {
+    "type": "node",
+    "id": 1002,
+    "lat": 59.938784,
+    "lon": 30.314997,
+    "tags": {"highway": "speed_camera", "maxspeed": "60 km/h", "direction": "NE"}
+  },
+  {
+    "type": "node",
+    "id": 1003,
+    "lat": 55.030204,
+    "lon": 82.920430,
+    "tags": {"highway": "speed_camera"}
+  },
+  {
+    "type": "way",
+    "id": 2001,
+    "center": {"lat": 56.838011, "lon": 60.597465},
+    "tags": {"highway": "speed_camera", "maxspeed": "RU:urban"}
+  },
+  {
+    "type": "relation",
+    "id": 3001,
+    "center": {"lat": 54.710157, "lon": 20.510137},
+    "tags": {"type": "enforcement", "enforcement": "average_speed", "maxspeed": "90"}
+  },
+  {
+    "type": "node",
+    "id": 4001,
+    "lat": 0.0,
+    "lon": 0.0,
+    "tags": {"highway": "speed_camera"}
+  },
+  {
+    "type": "node",
+    "id": 5001,
+    "lat": 55.5,
+    "lon": 37.5,
+    "tags": {"amenity": "cafe"}
+  }
+]

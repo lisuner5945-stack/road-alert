@@ -1,0 +1,25 @@
+# Gradle / build
+.gradle/
+build/
+app/build/
+captures/
+.cxx/
+
+# Android Studio / IDEA
+.idea/
+*.iml
+.DS_Store
+
+# Secrets — НИКОГДА не коммитить
+*.jks
+*.keystore
+keystore.properties
+local.properties
+ads.properties
+
+# Прочее
+*.log
+*.hprof
+/tools/osm/.venv/
+/tools/osm/__pycache__/
+/tools/osm/out/

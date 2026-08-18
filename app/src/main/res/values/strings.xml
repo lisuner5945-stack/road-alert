@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="notification_channel_trip">Активная поездка</string>
+    <string name="notification_channel_trip_description">Постоянное уведомление, пока приложение следит за камерами</string>
+    <string name="notification_trip_title">Антирадар работает</string>
+    <string name="notification_stop">Остановить</string>
+
+    <string name="notification_channel_car">Подключение к автомобилю</string>
+    <string name="notification_car_title">Автомобиль подключён</string>
+    <string name="notification_car_text">Нажмите, чтобы запустить антирадар</string>
+</resources>

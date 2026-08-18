@@ -1,0 +1,9 @@
+# Production Ad Unit ID из РСЯ. Скопируйте в ads.properties (не коммитится).
+# До прохождения модерации РСЯ оставьте файл отсутствующим —
+# debug-сборка автоматически использует официальные demo-блоки Яндекса.
+#
+# Release-сборка падает, если ADS_ENABLED=true и здесь остались demo-* значения.
+
+adsEnabled=false
+bannerUnitId=
+interstitialUnitId=

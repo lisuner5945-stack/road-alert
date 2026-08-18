@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<full-backup-content>
+    <!--
+      Бэкапим только настройки. База камер и локальный журнал не включены:
+      база перекачивается сама, а тащить её в облако пользователя незачем.
+    -->
+    <include domain="sharedpref" path="." />
+</full-backup-content>
