@@ -37,6 +37,11 @@ jobs:
           distribution: temurin
           java-version: '17'
 
+      - name: Android SDK (platform 36, build-tools 36) + принятые лицензии
+        uses: android-actions/setup-android@v3
+        with:
+          packages: 'platforms;android-36 build-tools;36.0.0 platform-tools'
+
       - name: Gradle wrapper validation
         uses: gradle/actions/wrapper-validation@v4
 
