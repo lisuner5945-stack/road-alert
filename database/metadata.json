@@ -1,11 +1,11 @@
 {
   "schema_version": 1,
-  "database_version": "2026-09-06T06:15:30Z",
-  "generated_at": "2026-09-06T06:15:30Z",
+  "database_version": "2026-09-07T07:02:12Z",
+  "generated_at": "2026-09-07T07:02:12Z",
   "source": "OpenStreetMap",
   "license": "ODbL",
-  "camera_count": 13630,
-  "sha256": "e54b6547f18ca2c4d7df49cbed6db9a0937961ee40287778888d242a3158009f",
+  "camera_count": 12708,
+  "sha256": "a07a6065f7154ed07abb5818f2cb377b4f78386d7c151ed8b5bff280b7306b96",
   "download_url": "https://raw.githubusercontent.com/lisuner5945-stack/road-alert/main/database/camera_database.json.gz",
   "failed_regions": []
 }
